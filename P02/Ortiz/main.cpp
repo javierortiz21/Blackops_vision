@@ -33,6 +33,7 @@ int main(int argc, char** argv) {
         cout<<"Number of cameras detected: " << numCameras<<endl;
 
         
+        
         // Enseño el frame de cada una de las cámaras
         for (unsigned int i = 0; i < numCameras; i++) {
             // Voy a subir esto pero no se si seguira funcionando:
@@ -45,6 +46,8 @@ int main(int argc, char** argv) {
 
             // Lanzo la cámara:    
             runSingleCamera(guid,i);
+        
+        // Llamo a la función que modificaron Javi y César el otro dia:
         }   
 
     }
