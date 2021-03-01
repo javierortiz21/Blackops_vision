@@ -94,65 +94,58 @@ int readFramesFromCamera(FlyCapture2::Camera *cam, int idxCam) {
             throw  string("Camera_error:: Error while retrieve an image");           
             fail = true;
         }
-        else {
-            // Create a converted image
-            FlyCapture2::Image convertedImage;
-            // Convert the raw image
-            error = rawImage.Convert(FlyCapture2::PIXEL_FORMAT_MONO8, &convertedImage);
-            if (error != FlyCapture2::PGRERROR_OK) {
-                printError(error);
-                throw  string("Camera_error:: Error in image conversion");           
-                fail = true;
-            }
-            else {
-                //* TO DO...
-                //* 1. Convertir la imagen de opencv a 3 canales para poder pintar sobre ella en color
-                //* 2. Si se pulsa 'G' grabar en un archivo en formato RAW (con fwrite) dentro de la carpeta /dat/
-                //*    En este caso se dibujara un rectangulo de color rojo y la palabra REC 
-                //*    en la imagen visualizada, no en la imagen que se graba.
-                //* 3. Si se pulsa 'S' salvar una imagen en formato PNG
-                //* 4. Cada vez que se grabe un video o una imagen se debe incrementar el contador correspondiente
-                
-                        cv::Mat imgRead = cv::Mat(convertedImage.GetRows(),convertedImage.GetCols(),CV_8UC1,convertedImage.GetData());	
-                        cv::cvtColor(convertedImage, convertedImageColor, CV_GRAY2RGB);	    // gris a color
-                        
-                        char aux = cv::waitKey(33); 
-                        key = toupper(aux); 
-                        switch(key){ 
-                            case 'G': 
-                                if(isRecording)
-                                    isRecording = false;
-                                else 
-                                    isRecording = true;
-                                    
-                                break;
-                            case 'S': 
-                                sprintf (nombreImagen, "imagen%04d.png", globalIndexImages++);
-                                pf_video = fopen(nombreImagen, "w"); 
-                                
-                                // por cada frame
-                                fwrite(imgRead.data, imgRead.rows*imgRead.cols, sizeof (unsigned char), pf_video);
-                                
-                                fclose(pf_video); pf_video=NULL; // solo se hace una vez por video
-                                break;  
-                        }
-                        
-                    if(isRecording)
-                    {
-                        sprintf (nombreVideo, "video%04d.raw", globalIndexVideo++);
-                        pf_video = fopen(nombreVideo, "w"); // solo se hace una vez por video
-                        
-                        // por cada frame
-                        fwrite(imgRead.data, imgRead.rows*imgRead.cols, sizeof (unsigned char), pf_video);
-                        
-                        
-                        fclose(pf_video); pf_video=NULL; // solo se hace una vez por video
-                    }
-				 			
-				 						
-                }
-            }
+    
+        // Create a converted image
+        FlyCapture2::Image convertedImage;
+        // Convert the raw image
+        error = rawImage.Convert(FlyCapture2::PIXEL_FORMAT_MONO8, &convertedImage);
+        if (error != FlyCapture2::PGRERROR_OK) {
+            printError(error);
+            throw  string("Camera_error:: Error in image conversion");           
+            fail = true;
         }
+
+        //* TO DO...
+        //* 1. Convertir la imagen de opencv a 3 canales para poder pintar sobre ella en color
+        //* 2. Si se pulsa 'G' grabar en un archivo en formato RAW (con fwrite) dentro de la carpeta /dat/
+        //*    En este caso se dibujara un rectangulo de color rojo y la palabra REC 
+        //*    en la imagen visualizada, no en la imagen que se graba.
+        //* 3. Si se pulsa 'S' salvar una imagen en formato PNG
+        //* 4. Cada vez que se grabe un video o una imagen se debe incrementar el contador correspondiente
+    
+        cv::Mat imgRead = cv::Mat(convertedImage.GetRows(),convertedImage.GetCols(),CV_8UC1,convertedImage.GetData());	
+        cv::cvtColor(convertedImage, convertedImageColor, CV_GRAY2RGB);	    // gris a color
+        
+        char aux = cv::waitKey(33); 
+        key = toupper(aux); 
+        switch(key)
+        { 
+            
+            // Hacemos toggle a la grabación
+            case 'G': 
+                    isRecording != isRecording;
+                    break;
+
+            // Hacemos una foto
+            case 'S': 
+                sprintf (nombreImagen, "imagen%04d.png", globalIndexImages++);
+                pf_video = fopen(nombreImagen, "w"); 
+                fwrite(imgRead.data, imgRead.rows*imgRead.cols, sizeof (unsigned char), pf_video);
+                fclose(pf_video); pf_video=NULL; // solo se hace una vez por video
+                break;  
+        }
+            
+        // Se guarda el frame en un fichero:
+        if(isRecording)
+        {
+            sprintf (nombreVideo, "video%04d.raw", globalIndexVideo++);
+            pf_video = fopen(nombreVideo, "w");             
+            fwrite(imgRead.data, imgRead.rows*imgRead.cols, sizeof (unsigned char), pf_video);
+            fclose(pf_video); pf_video=NULL; // solo se hace una vez por video
+        }
+                
+				 						
+            
         if (pf_video != NULL)
             fclose(pf_video);
     }
