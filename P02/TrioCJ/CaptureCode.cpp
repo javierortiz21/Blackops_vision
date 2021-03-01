@@ -72,6 +72,8 @@ int readFramesFromCamera(FlyCapture2::Camera *cam, int idxCam) {
     int ret = 0;
     FlyCapture2::Error error;
     FlyCapture2::Image rawImage;
+    FlyCapture2::Image convertedImage;
+
     char key = 'V', nombreImagen[100], nombreVideo[100];
     FILE *pf_video = NULL;
     bool isRecording = false, fail = false;    
@@ -82,37 +84,21 @@ int readFramesFromCamera(FlyCapture2::Camera *cam, int idxCam) {
 
     // Retrieve an image to get image size and allocate IplImage
     error = cam->RetrieveBuffer(&rawImage);
-    if (error != FlyCapture2::PGRERROR_OK) {
+    if (error != FlyCapture2::PGRERROR_OK) 
         throw  string("Camera_error:: Error while retrieve an image");           
-    }
 
-    while (key != 'Q' && !fail) {
+    while (key != 'Q') {
         // Retrieve an image
         error = cam->RetrieveBuffer(&rawImage);
-        if (error != FlyCapture2::PGRERROR_OK) {
-            printError(error);
+        if (error != FlyCapture2::PGRERROR_OK) 
             throw  string("Camera_error:: Error while retrieve an image");           
-            fail = true;
-        }
     
-        // Create a converted image
-        FlyCapture2::Image convertedImage;
+        
         // Convert the raw image
         error = rawImage.Convert(FlyCapture2::PIXEL_FORMAT_MONO8, &convertedImage);
-        if (error != FlyCapture2::PGRERROR_OK) {
-            printError(error);
+        if (error != FlyCapture2::PGRERROR_OK) 
             throw  string("Camera_error:: Error in image conversion");           
-            fail = true;
-        }
 
-        //* TO DO...
-        //* 1. Convertir la imagen de opencv a 3 canales para poder pintar sobre ella en color
-        //* 2. Si se pulsa 'G' grabar en un archivo en formato RAW (con fwrite) dentro de la carpeta /dat/
-        //*    En este caso se dibujara un rectangulo de color rojo y la palabra REC 
-        //*    en la imagen visualizada, no en la imagen que se graba.
-        //* 3. Si se pulsa 'S' salvar una imagen en formato PNG
-        //* 4. Cada vez que se grabe un video o una imagen se debe incrementar el contador correspondiente
-    
         cv::Mat imgRead = cv::Mat(convertedImage.GetRows(),convertedImage.GetCols(),CV_8UC1,convertedImage.GetData());	
         cv::cvtColor(convertedImage, convertedImageColor, CV_GRAY2RGB);	    // gris a color
         
@@ -123,6 +109,7 @@ int readFramesFromCamera(FlyCapture2::Camera *cam, int idxCam) {
             
             // Hacemos toggle a la grabación
             case 'G': 
+                    // Hay que poner el cuadrito naranja
                     isRecording != isRecording;
                     break;
 
@@ -131,7 +118,8 @@ int readFramesFromCamera(FlyCapture2::Camera *cam, int idxCam) {
                 sprintf (nombreImagen, "imagen%04d.png", globalIndexImages++);
                 pf_video = fopen(nombreImagen, "w"); 
                 fwrite(imgRead.data, imgRead.rows*imgRead.cols, sizeof (unsigned char), pf_video);
-                fclose(pf_video); pf_video=NULL; // solo se hace una vez por video
+                fclose(pf_video); 
+                pf_video=NULL;
                 break;  
         }
             
@@ -141,7 +129,8 @@ int readFramesFromCamera(FlyCapture2::Camera *cam, int idxCam) {
             sprintf (nombreVideo, "video%04d.raw", globalIndexVideo++);
             pf_video = fopen(nombreVideo, "w");             
             fwrite(imgRead.data, imgRead.rows*imgRead.cols, sizeof (unsigned char), pf_video);
-            fclose(pf_video); pf_video=NULL; // solo se hace una vez por video
+            fclose(pf_video); 
+            pf_video=NULL; 
         }
                 
 				 						
