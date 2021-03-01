@@ -7,8 +7,8 @@ using namespace std;
 int cvt_Bayer_RGB(cv::Mat imgBayer, cv::Mat *imgRGB) {
   cv::Mat canales[3];
   //convertir a RGB y mostrar resultado
-  // ..
-  cv::cvtColor(imagBayer, imgRGB, cv::COLOR_BayerGR2RGB)
+  // A lo mejor hay que usar una variable auxiliar
+  cv::cvtColor(imagBayer, *imgRGB, cv::COLOR_BayerGR2RGB)
   cv::imshow("RGB",imgRGB);
   //separar los canales con split y mostrarlos por separado
   // ..
